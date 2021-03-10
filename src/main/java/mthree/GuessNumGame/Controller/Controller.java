@@ -4,7 +4,6 @@ package mthree.GuessNumGame.Controller;
 
 
 import mthree.GuessNumGame.DOA.GameDao;
-import mthree.GuessNumGame.DOA.GuessDoa;
 import mthree.GuessNumGame.DOA.RoundDao;
 import mthree.GuessNumGame.entities.Game;
 import mthree.GuessNumGame.entities.Guess;
@@ -14,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Random;
 
@@ -21,15 +21,13 @@ import java.util.Random;
 @RequestMapping ("api/Game")
 public class Controller {
 
+
     private final GameDao doa;
     private final RoundDao Rdoa;
-    private final GuessDoa Gdoa;
-    private List LocalDateTime;
 
-    public Controller (GameDao doa, RoundDao Rdoa, GuessDoa Gdoa){
+    public Controller (GameDao doa, RoundDao Rdoa){
         this.doa = doa;
         this.Rdoa = Rdoa;
-        this.Gdoa= Gdoa;
     }
     @PostMapping("/begin")
     @ResponseStatus(HttpStatus.CREATED)
@@ -46,20 +44,23 @@ public class Controller {
     }
 
     @PostMapping("/guess")
-    public Round makeGuess (int gameId, String guess) {
+    public Round makeGuess (int gameId, String guess, Timestamp guessTime) {
         Guess g= new Guess();
         Round round = new Round();
         round.setGameId(gameId);
         g.setGuess(guess);
 
-        String answer = doa.getGameById(round.getGameId()).getAnswer();
+        round.setGuess(guess);
+        round.setGuessTime(new Timestamp(System.currentTimeMillis()));
+
+        Game x = doa.getGameById(round.getGameId());
+        String answer = x.getAnswer();
         String result = determineResult(guess, answer);
         round.setResult(result);
 
         if (g.equals(answer)) {
             Game game = (Game) getGameById(round.getGameId());
             game.setFinished(true);
-            round.setRoundId(gameId);
             doa.updateGame(game);
         }
 
@@ -92,9 +93,9 @@ public class Controller {
             return new ResponseEntity(game, HttpStatus.OK);
 
         }
-
         return doa.getGameById(gameId);
 
+        //showing the gameIds for all games to be 3 when it should be showing individual gameIds
     }
 
 
@@ -102,6 +103,7 @@ public class Controller {
 
     public List<Round> getAllRoundsByGameId( int gameId) {
         List<Round> round = (List<Round>) Rdoa.getAllRoundsByGameId(gameId);
+
 
 
         return (List<Round>) Rdoa.getAllRoundsByGameId(gameId);

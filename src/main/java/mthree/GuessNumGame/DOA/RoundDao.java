@@ -27,4 +27,6 @@ public interface RoundDao {
 
     Round addRound(Round round);
     public int getGameId();
+
+    public Round makeGuess (Round guess);
 }

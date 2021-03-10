@@ -5,7 +5,6 @@ package mthree.GuessNumGame.DOA;
 
 import mthree.GuessNumGame.entities.Guess;
 import mthree.GuessNumGame.entities.Round;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -24,13 +24,9 @@ public class RoundDaoDB implements RoundDao {
     private final JdbcTemplate jdbcTemplate;
     private List Current_TimeStamp;
 
-
-    @Autowired
-    public RoundDaoDB(JdbcTemplate jdbcTemplate, List current_timeStamp) {
+    public RoundDaoDB(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        Current_TimeStamp = current_timeStamp;
     }
-
 
 
     @Override
@@ -43,6 +39,7 @@ public class RoundDaoDB implements RoundDao {
         }
     }
 
+
     @Override
     @Transactional
     public Round addRound(Round round, Guess guess) {
@@ -51,16 +48,17 @@ public class RoundDaoDB implements RoundDao {
 
         int newRoundId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
         round.setRoundId(newRoundId);
-        return getRoundById(newRoundId);
+        return round;
     }
 
 
     @Override
     public Object getGuessTime(List getRoundForGame) {
-        final String INSERT_ROUND = "SELECT * FROM Round WHERE gameId";
+        final String INSERT_ROUND = "SELECT * FROM Round WHERE guessTime";
         jdbcTemplate.update(INSERT_ROUND, getRoundForGame);
         return null;
     }
+
 
     @Override
     public List<Round> getGameById(int gameId) {
@@ -69,16 +67,26 @@ public class RoundDaoDB implements RoundDao {
         return null;
     }
 
+
     @Override
     public ResponseEntity<Guess> getAllRoundsByGameId(int gameId) {
         try {
             final String SELECT_ROUNDS_BY_GAMEID = "SELECT * FROM round "
-                    + "WHERE gameId = ? ORDER BY guessTime";
-            List<Round> rounds = jdbcTemplate.query(SELECT_ROUNDS_BY_GAMEID, new RoundMapper(), gameId);
-            return (ResponseEntity<Guess>) rounds;
-        } catch(DataAccessException ex) {
+                    + "WHERE gameId = ? ORDER BY guess_time";
+            List guess = jdbcTemplate.query(SELECT_ROUNDS_BY_GAMEID, new RoundDaoDB.RoundMapper(), gameId);
+            return (ResponseEntity<Guess>) guess;
+        } catch (DataAccessException ex) {
             return null;
         }
+    }
+
+
+    @Override
+    public Round makeGuess(Round guess) {
+        String SQL = "update Guess guess=?";
+        Object makeGuess = new Object();
+        jdbcTemplate.update(SQL, makeGuess);
+        return (Round) makeGuess;
     }
 
     @Override
@@ -90,8 +98,6 @@ public class RoundDaoDB implements RoundDao {
     public int getGameId() {
         return 0;
     }
-
-
     public static final class RoundMapper implements RowMapper<Round> {
 
         @Override
@@ -102,5 +108,4 @@ public class RoundDaoDB implements RoundDao {
             return round;
         }
     }
-
 }
