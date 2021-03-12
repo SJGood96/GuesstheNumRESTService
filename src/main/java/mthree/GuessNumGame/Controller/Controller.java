@@ -3,6 +3,7 @@ package mthree.GuessNumGame.Controller;
 //@author Spencer Good
 
 
+
 import mthree.GuessNumGame.DOA.GameDao;
 import mthree.GuessNumGame.DOA.RoundDao;
 import mthree.GuessNumGame.entities.Game;
@@ -14,21 +15,23 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @RestController
 @RequestMapping ("api/Game")
-public class Controller {
+public class Controller<gameId> {
 
 
     private final GameDao doa;
     private final RoundDao Rdoa;
 
-    public Controller (GameDao doa, RoundDao Rdoa){
+    public Controller(GameDao doa, RoundDao Rdoa) {
         this.doa = doa;
         this.Rdoa = Rdoa;
     }
+
     @PostMapping("/begin")
     @ResponseStatus(HttpStatus.CREATED)
     public int create() {
@@ -38,14 +41,14 @@ public class Controller {
 
         game = doa.addGame(game);//Sets the game in the database
 
-        //This returns the game by the gameId
 
-        return game.getGameId();
+
+        return game.getGameId(); //This returns the gameId for the user
     }
 
     @PostMapping("/guess")
-    public Round makeGuess (int gameId, String guess, Timestamp guessTime) {
-        Guess g= new Guess();
+    public Round makeGuess(int gameId, String guess, Timestamp guessTime) {
+        Guess g = new Guess();
         Round round = new Round();
         round.setGameId(gameId);
         g.setGuess(guess);
@@ -58,6 +61,7 @@ public class Controller {
         String result = determineResult(guess, answer);
         round.setResult(result);
 
+        //If the guess is equal to the answer then the game is finished
         if (g.equals(answer)) {
             Game game = (Game) getGameById(round.getGameId());
             game.setFinished(true);
@@ -67,11 +71,13 @@ public class Controller {
         return Rdoa.addRound(round, g);
     }
 
+    //This will show all the games that are in the database. It will hide the answer if the
+    //game is still being played.
     @GetMapping("/games")
     public List<Game> getAllGames() {
         List<Game> games = doa.getAllGames();
         for (Game game : games) {
-            if (!game.isFinished()) {
+            if (!Game.isFinished()) {
                 game.setAnswer("****");
             }
         }
@@ -79,11 +85,13 @@ public class Controller {
         return games;
     }
 
+
+    //This returns a certain game by its id and if the game is finished it will hide the answer.
     @GetMapping("/game/{gameId}")
 
-    public Object getGameById (@PathVariable ("gameId") int gameId) {
+    public Object getGameById(@PathVariable("gameId") int gameId) {
         Game game = doa.getGameById(gameId);
-        if (!game.isFinished()) {
+        if (!Game.isFinished()) {
             game.setAnswer("****");
 
             if (game == null) {
@@ -93,23 +101,26 @@ public class Controller {
             return new ResponseEntity(game, HttpStatus.OK);
 
         }
+
         return doa.getGameById(gameId);
 
         //showing the gameIds for all games to be 3 when it should be showing individual gameIds
     }
 
 
+    //This returns the rounds of a certain game by it's id along with
+    //sorting the rounds by guessTime.
     @GetMapping("/rounds/{gameId}")
+    public Object getAllRoundsByGameId (int gameId) {
+        List<Round> rounds = Rdoa.getAllRoundsByGameId(gameId);
 
-    public List<Round> getAllRoundsByGameId( int gameId) {
-        List<Round> round = (List<Round>) Rdoa.getAllRoundsByGameId(gameId);
+            if (rounds == null) {
+            return  new ResponseEntity(null, HttpStatus.NOT_FOUND);
+        }
 
-
-
-        return (List<Round>) Rdoa.getAllRoundsByGameId(gameId);
-
-
+        return  new ResponseEntity(rounds, HttpStatus.OK);
     }
+
 
 
     //This method uses random to draw a specific number between zero and the specific value which in this
@@ -136,8 +147,8 @@ public class Controller {
 
         //This equation adds the vaules of the four random numbers to create the secret number.
 
-        String answer = String.valueOf(digit1) + String.valueOf(digit2)
-                + String.valueOf(digit3) + String.valueOf(digit4);
+        String answer = String.valueOf(digit1) + digit2
+                + digit3 + digit4;
 
 
 
@@ -145,7 +156,7 @@ public class Controller {
     }
 
     private void hideAnswer(Game gameToReturn) {
-        if (gameToReturn.isFinished() == false) {
+        if (Game.isFinished() == false) {
             gameToReturn.setAnswer("****");
         }
     }
@@ -155,7 +166,7 @@ public class Controller {
         int exact = 0;
         int partial = 0;
 
-        for (int i = 0; i < guessChars.length-1; i++) {
+        for (int i = 0; i < guessChars.length; i++) {
             // -1 indicates that index value of guessChars DNE in answer
             // otherwise the number must be in the string. Then check where
             if (answer.indexOf(guessChars[i]) > -1) {

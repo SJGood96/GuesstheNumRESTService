@@ -29,22 +29,16 @@ public class Round {
     }
 
 
-    public int getRoundId(int gameId) {
-        return roundId;
-    }
 
     public void setRoundId(int roundId) {
         this.roundId = roundId;
     }
 
+    public int getRoundId () { return roundId; }
 
-    public Timestamp getGuessTime(List getRoundForGame) {
-        return guessTime;
-    }
+    public Timestamp getGuessTime(List getRoundForGame) { return guessTime; }
 
-    public void setGuessTime(Timestamp guessTime) {
-        this.guessTime = guessTime;
-    }
+    public void setGuessTime(Timestamp guessTime) { this.guessTime = guessTime; }
 
     public String getResult() {
         return result;
@@ -73,6 +67,8 @@ public class Round {
 
     public int makeGuess(int guess) { return guess; }
 
+    public Object getGuessTime() { return guessTime; }
+
 
 
 
@@ -90,6 +86,5 @@ public class Round {
         return Objects.hash(roundId, guessTime, result, gameId, guess);
     }
 
-    public Object getGuessTime() { return guessTime; }
 }
 

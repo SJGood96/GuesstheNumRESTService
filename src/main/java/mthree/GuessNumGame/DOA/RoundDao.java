@@ -23,10 +23,12 @@ public interface RoundDao {
 
     List<Round> getGameById(int gameId);
 
-    ResponseEntity<Guess> getAllRoundsByGameId(int gameId);
+    List<Round> getAllRoundsByGameId(int gameId);
 
     Round addRound(Round round);
     public int getGameId();
 
     public Round makeGuess (Round guess);
+
+    int getRoundId();
 }

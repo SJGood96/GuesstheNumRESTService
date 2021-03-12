@@ -26,7 +26,7 @@ public class GameDaoDB implements GameDao {
 
     @Override
     public List<Game> getAllGames() {
-        final String SELECT_ALL_GAMES = "SELECT * FROM game";
+        final String SELECT_ALL_GAMES = "SELECT * FROM game WHERE gameId";
         return jdbc.query(SELECT_ALL_GAMES, new GameMapper());
     }
 

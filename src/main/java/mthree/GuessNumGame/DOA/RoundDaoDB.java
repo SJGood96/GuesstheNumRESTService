@@ -7,7 +7,6 @@ import mthree.GuessNumGame.entities.Guess;
 import mthree.GuessNumGame.entities.Round;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -30,14 +29,11 @@ public class RoundDaoDB implements RoundDao {
 
 
     @Override
-    public Round getRoundById(int roundId) {
-        try {
-            final String SELECT_ROUND_BY_ID = "SELECT * FROM round WHERE round_id = ?";
-            return jdbcTemplate.queryForObject(SELECT_ROUND_BY_ID, new RoundMapper(), roundId);
-        } catch(DataAccessException ex) {
+    public Round getRoundById(int gameId) {
+            final String SELECT_ROUNDS_BY_ID = "SELECT * FROM round WHERE gameId = ? ORDER BY guessTime";
+           jdbcTemplate.query(SELECT_ROUNDS_BY_ID, new RoundMapper(), gameId);
             return null;
         }
-    }
 
 
     @Override
@@ -69,16 +65,10 @@ public class RoundDaoDB implements RoundDao {
 
 
     @Override
-    public ResponseEntity<Guess> getAllRoundsByGameId(int gameId) {
-        try {
-            final String SELECT_ROUNDS_BY_GAMEID = "SELECT * FROM round "
-                    + "WHERE gameId = ? ORDER BY guess_time";
-            List guess = jdbcTemplate.query(SELECT_ROUNDS_BY_GAMEID, new RoundDaoDB.RoundMapper(), gameId);
-            return (ResponseEntity<Guess>) guess;
-        } catch (DataAccessException ex) {
-            return null;
+    public List<Round> getAllRoundsByGameId(int gameId) {
+            final String SELECT_ROUNDS_BY_GAMEID = "SELECT * FROM round WHERE gameId = ? ORDER BY guessTime";
+           return jdbcTemplate.query(SELECT_ROUNDS_BY_GAMEID, new RoundMapper(), gameId);
         }
-    }
 
 
     @Override
@@ -98,6 +88,12 @@ public class RoundDaoDB implements RoundDao {
     public int getGameId() {
         return 0;
     }
+
+    @Override
+    public int getRoundId() {
+        return 0;
+    }
+
     public static final class RoundMapper implements RowMapper<Round> {
 
         @Override
@@ -105,6 +101,7 @@ public class RoundDaoDB implements RoundDao {
             Round round = new Round();
             round.setRoundId(rs.getInt("roundId"));
             round.setResult(rs.getString("result"));
+            round.setGuess(rs.getString("guess"));
             return round;
         }
     }
