@@ -22,12 +22,12 @@ import java.util.List;
 public class GameDaoDB implements GameDao {
 
     @Autowired
-    JdbcTemplate jdbc;
+    JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Game> getAllGames() {
-        final String SELECT_ALL_GAMES = "SELECT * FROM game WHERE gameId";
-        return jdbc.query(SELECT_ALL_GAMES, new GameMapper());
+        final String SELECT_ALL_GAMES = "SELECT * FROM game";
+        return jdbcTemplate.query(SELECT_ALL_GAMES, new GameMapper());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class GameDaoDB implements GameDao {
     public Game getGameById(int gameId) {
         try {
             final String SELECT_GAME_BY_ID = "SELECT * FROM game WHERE gameId = ?;";
-            return jdbc.queryForObject(SELECT_GAME_BY_ID, new GameMapper(), gameId);
+            return jdbcTemplate.queryForObject(SELECT_GAME_BY_ID, new GameMapper(), gameId);
         } catch(DataAccessException ex) {
             return null;
         }
@@ -55,9 +55,9 @@ public class GameDaoDB implements GameDao {
     @Transactional
     public Game addGame(Game game) {
         final String INSERT_GAME = "INSERT INTO game(answer) VALUES (?)";
-        jdbc.update(INSERT_GAME, game.getAnswer());
+        jdbcTemplate.update(INSERT_GAME, game.getAnswer());
 
-        int newGameId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
+        int newGameId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
         game.setGameId(newGameId);
         return game;
     }
@@ -65,7 +65,7 @@ public class GameDaoDB implements GameDao {
     @Override
     public boolean updateGame(Game game) {
         final String UPDATE_GAME = "UPDATE game SET finished = ? WHERE gameId = ?";
-        jdbc.update(UPDATE_GAME, game.isFinished(), game.getGameId());
+        jdbcTemplate.update(UPDATE_GAME, game.isFinished(), game.getGameId());
         return false;
     }
 

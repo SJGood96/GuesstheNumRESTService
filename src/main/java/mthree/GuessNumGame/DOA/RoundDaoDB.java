@@ -102,6 +102,8 @@ public class RoundDaoDB implements RoundDao {
             round.setRoundId(rs.getInt("roundId"));
             round.setResult(rs.getString("result"));
             round.setGuess(rs.getString("guess"));
+
+            round.setResult(rs.getString("result"));
             return round;
         }
     }

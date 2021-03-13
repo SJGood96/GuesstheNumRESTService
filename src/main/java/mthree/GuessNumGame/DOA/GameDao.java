@@ -9,10 +9,6 @@ import java.util.List;
 
 public interface GameDao {
 
-    static GameDao findGameById(int gameId) {
-        return null;
-    }
-
     List<Game> getAllGames();
 
     String getAnswer(int gameId);

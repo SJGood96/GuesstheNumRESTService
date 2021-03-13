@@ -62,8 +62,8 @@ public class Controller<gameId> {
         round.setResult(result);
 
         //If the guess is equal to the answer then the game is finished
-        if (g.equals(answer)) {
-            Game game = (Game) getGameById(round.getGameId());
+        if (answer.equals(g.getGuess())) {
+            Game game = doa.getGameById(round.getGameId());;
             game.setFinished(true);
             doa.updateGame(game);
         }
@@ -77,7 +77,7 @@ public class Controller<gameId> {
     public List<Game> getAllGames() {
         List<Game> games = doa.getAllGames();
         for (Game game : games) {
-            if (!Game.isFinished()) {
+            if (!game.isFinished()) {
                 game.setAnswer("****");
             }
         }
@@ -91,7 +91,7 @@ public class Controller<gameId> {
 
     public Object getGameById(@PathVariable("gameId") int gameId) {
         Game game = doa.getGameById(gameId);
-        if (!Game.isFinished()) {
+        if (!game.isFinished()) {
             game.setAnswer("****");
 
             if (game == null) {
@@ -104,14 +104,14 @@ public class Controller<gameId> {
 
         return doa.getGameById(gameId);
 
-        //showing the gameIds for all games to be 3 when it should be showing individual gameIds
+
     }
 
 
     //This returns the rounds of a certain game by it's id along with
     //sorting the rounds by guessTime.
     @GetMapping("/rounds/{gameId}")
-    public Object getAllRoundsByGameId (int gameId) {
+    public Object getAllRoundsByGameId (@PathVariable("gameId") int gameId) {
         List<Round> rounds = Rdoa.getAllRoundsByGameId(gameId);
 
             if (rounds == null) {
@@ -156,7 +156,7 @@ public class Controller<gameId> {
     }
 
     private void hideAnswer(Game gameToReturn) {
-        if (Game.isFinished() == false) {
+        if (gameToReturn.isFinished() == false) {
             gameToReturn.setAnswer("****");
         }
     }

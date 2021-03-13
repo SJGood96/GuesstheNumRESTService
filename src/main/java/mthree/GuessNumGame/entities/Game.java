@@ -6,12 +6,10 @@ package mthree.GuessNumGame.entities;
 import java.util.Objects;
 
 public class Game {
-    private static int gameId;
-    private static boolean finished;
+    private int gameId;
+    private boolean finished;
     private String answer;
 
-    public Game() {
-    }
 
     public int getGameId()
     {
@@ -33,18 +31,16 @@ public class Game {
         this.answer = answer;
     }
 
-    public static boolean isFinished()
+    public boolean isFinished()
     {
         return finished;
     }
 
-    public boolean setFinished(boolean finished)
+    public void setFinished(boolean finished)
     {
         this.finished = finished;
-        return finished;
     }
-    public void setAnswer() {
-    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
